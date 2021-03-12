@@ -3,6 +3,17 @@ const User = require("../models/users.model");
 
 const router = express.Router();
 
+router.route("/:username").get((req, res) => {
+    User.findOne({ username: req.params.username },
+        (err, result) => {
+            if (err) return res.status(500).json({ msg: err });
+            res.json({
+                data: result,
+                username: req.params.username,
+            });
+        })
+});
+
 router.route("/register").post((req, res) => {
     console.log("im inside the register");
     const user = new User({
@@ -19,6 +30,21 @@ router.route("/register").post((req, res) => {
         .catch((err) => {
             res.status(403).json({ msg: err })
         });
+});
+
+router.route("/login").post((req, res) => {
+    User.findOne({ username: req.body.username }, (err, result) => {
+        if (err) return res.status(500).json({ msg: err });
+        if (result === null) {
+            return res.status(403).json("Username is wrong");
+        }
+        if (result.password === req.body.password) {
+            res.json("ok");
+        }
+        else {
+            res.status(403).json("password is wrong");
+        }
+    });
 });
 
 router.route("/update/:username").patch((req, res) => {
